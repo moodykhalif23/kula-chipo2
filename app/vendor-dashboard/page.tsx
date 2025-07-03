@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useDropzone } from "react-dropzone"
@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 // Mock data for the vendor
 const vendorData = {
@@ -319,6 +320,26 @@ function PricingManager({
 export default function VendorDashboard() {
   const [vendor, setVendor] = useState(vendorData)
   const [activeTab, setActiveTab] = useState("overview")
+  const [showAddMenuModal, setShowAddMenuModal] = useState(false)
+  const [newMenuItem, setNewMenuItem] = useState({ name: "", price: "", description: "", available: true })
+
+  // Refs for scrolling
+  const addMenuItemRef = useRef<HTMLButtonElement>(null)
+  const updateHoursRef = useRef<HTMLDivElement>(null)
+
+  // Scroll helpers
+  const scrollToAddMenuItem = () => {
+    setTimeout(() => {
+      addMenuItemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      addMenuItemRef.current?.focus()
+      setShowAddMenuModal(true)
+    }, 100) // Wait for tab content to render
+  }
+  const scrollToUpdateHours = () => {
+    setTimeout(() => {
+      updateHoursRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+    }, 100)
+  }
 
   const handleToggleStatus = () => {
     setVendor((prev) => ({ ...prev, isOpen: !prev.isOpen }))
@@ -329,6 +350,28 @@ export default function VendorDashboard() {
       ...prev,
       menu: prev.menu.map((item) => (item.id === itemId ? { ...item, available: !item.available } : item)),
     }))
+  }
+
+  const handleAddMenuItem = () => {
+    setShowAddMenuModal(true)
+  }
+
+  const handleSaveMenuItem = () => {
+    setVendor((prev) => ({
+      ...prev,
+      menu: [
+        ...prev.menu,
+        {
+          id: prev.menu.length + 1,
+          name: newMenuItem.name,
+          price: parseFloat(newMenuItem.price),
+          description: newMenuItem.description,
+          available: newMenuItem.available,
+        },
+      ],
+    }))
+    setShowAddMenuModal(false)
+    setNewMenuItem({ name: "", price: "", description: "", available: true })
   }
 
   return (
@@ -517,19 +560,40 @@ export default function VendorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <Button className="h-20 flex flex-col items-center gap-2 bg-orange-500 hover:bg-orange-600">
+                    <Button
+                      className="h-20 flex flex-col items-center gap-2 bg-orange-500 hover:bg-orange-600"
+                      onClick={() => setActiveTab("profile")}
+                    >
                       <Edit className="w-6 h-6" />
                       <span>Update Profile</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="h-20 flex flex-col items-center gap-2 bg-transparent"
+                      onClick={() => {
+                        setActiveTab("menu")
+                        scrollToAddMenuItem()
+                      }}
+                    >
                       <Plus className="w-6 h-6" />
                       <span>Add Menu Item</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="h-20 flex flex-col items-center gap-2 bg-transparent"
+                      onClick={() => setActiveTab("photos")}
+                    >
                       <Camera className="w-6 h-6" />
                       <span>Upload Photos</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex flex-col items-center gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="h-20 flex flex-col items-center gap-2 bg-transparent"
+                      onClick={() => {
+                        setActiveTab("profile")
+                        scrollToUpdateHours()
+                      }}
+                    >
                       <Clock className="w-6 h-6" />
                       <span>Update Hours</span>
                     </Button>
@@ -626,7 +690,7 @@ export default function VendorDashboard() {
                 </div>
 
                 {/* Operating Hours */}
-                <div>
+                <div ref={updateHoursRef}>
                   <Label>Operating Hours</Label>
                   <div className="mt-2 space-y-3">
                     {Object.entries(vendor.hours).map(([day, hours]) => (
@@ -660,7 +724,11 @@ export default function VendorDashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Menu Management</CardTitle>
-                  <Button className="bg-orange-500 hover:bg-orange-600">
+                  <Button
+                    className="bg-orange-500 hover:bg-orange-600"
+                    ref={addMenuItemRef}
+                    onClick={handleAddMenuItem}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Menu Item
                   </Button>
@@ -857,6 +925,37 @@ export default function VendorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Add Menu Item Modal */}
+      <Dialog open={showAddMenuModal} onOpenChange={setShowAddMenuModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Menu Item</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="menu-name">Name</Label>
+              <Input id="menu-name" value={newMenuItem.name} onChange={e => setNewMenuItem({ ...newMenuItem, name: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="menu-price">Price</Label>
+              <Input id="menu-price" type="number" min="0" step="0.01" value={newMenuItem.price} onChange={e => setNewMenuItem({ ...newMenuItem, price: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="menu-description">Description</Label>
+              <Textarea id="menu-description" value={newMenuItem.description} onChange={e => setNewMenuItem({ ...newMenuItem, description: e.target.value })} />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={newMenuItem.available} onCheckedChange={v => setNewMenuItem({ ...newMenuItem, available: v })} />
+              <span>Available</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddMenuModal(false)}>Cancel</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleSaveMenuItem}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
