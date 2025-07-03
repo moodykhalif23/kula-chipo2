@@ -5,7 +5,6 @@ import "./globals.css"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import ErrorBoundary from "@/components/error-boundary"
 import { Toaster } from "@/components/toaster"
-import { ClerkProvider, SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,26 +20,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>
-          <ErrorBoundary>
-            <AuthProvider>
-              <header>
-                <SignedOut>
-                  <SignInButton />
-                  <SignUpButton />
-                </SignedOut>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-              </header>
-              {children}
-              <Toaster />
-            </AuthProvider>
-          </ErrorBoundary>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en">
+      <body className={inter.className}>
+        <ErrorBoundary>
+          <AuthProvider>
+            <header>
+              {/* */}
+            </header>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </ErrorBoundary>
+      </body>
+    </html>
   )
 }

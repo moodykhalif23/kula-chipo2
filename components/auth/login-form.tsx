@@ -68,11 +68,17 @@ export function LoginForm() {
         })
 
         // Redirect based on role
-        if (session?.user?.role === "vendor") {
-          console.log("🏪 Redirecting vendor to dashboard")
-          router.push("/vendor-dashboard")
+        if (session && session.user && typeof (session.user as { role?: string }).role === "string") {
+          const userWithRole = session.user as { role: string }
+          if (userWithRole.role === "vendor") {
+            console.log("🏪 Redirecting vendor to dashboard")
+            router.push("/vendor-dashboard")
+          } else {
+            console.log("🏠 Redirecting customer to home")
+            router.push("/")
+          }
         } else {
-          console.log("🏠 Redirecting customer to home")
+          // Fallback if role is missing
           router.push("/")
         }
       }
@@ -113,14 +119,6 @@ export function LoginForm() {
         <CardDescription>Enter your email and password to access your account</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Demo Credentials */}
-        <div className="bg-blue-50 p-3 rounded-lg text-sm">
-          <p className="font-medium text-blue-900 mb-1">Demo Accounts:</p>
-          <p className="text-blue-800">Customer: demo@kulachipo.com</p>
-          <p className="text-blue-800">Vendor: vendor@kulachipo.com</p>
-          <p className="text-blue-800">Password: password123</p>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

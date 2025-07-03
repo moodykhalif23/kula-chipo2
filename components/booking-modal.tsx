@@ -149,7 +149,7 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -176,7 +176,7 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 h-[80vh] overflow-y-auto">
           {showReservations ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
               <TabsList className="mx-6 grid w-auto grid-cols-2">
