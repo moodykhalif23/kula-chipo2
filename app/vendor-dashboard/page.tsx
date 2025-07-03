@@ -281,7 +281,9 @@ function PricingCard({ plan }: { plan: PricingPlanProps }) {
             </li>
           ))}
         </ul>
-        <Button className="w-full bg-orange-500 hover:bg-orange-600">Choose Plan</Button>
+        <Link href={`/subscribe/${plan.name.toLowerCase()}`} passHref legacyBehavior>
+          <Button className="w-full bg-orange-500 hover:bg-orange-600">Choose Plan</Button>
+        </Link>
       </CardContent>
     </Card>
   )
