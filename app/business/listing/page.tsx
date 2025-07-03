@@ -293,7 +293,7 @@ export default function BusinessListingPage() {
                       <Label htmlFor="website">Website (Optional)</Label>
                       <Input
                         id="website"
-                        placeholder="https://yourwebsite.com"
+                        placeholder="Website URL"
                         value={formData.website}
                         onChange={(e) => handleInputChange("website", e.target.value)}
                       />
