@@ -170,9 +170,6 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                 </div>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
           </div>
         </DialogHeader>
 
