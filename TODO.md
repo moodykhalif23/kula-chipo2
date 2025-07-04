@@ -11,14 +11,11 @@ This TODO list is based on the audit roadmap and current codebase analysis. Chec
 ## 2. Error Handling
 - [ ] Complete error handling: implement offline state handling and network error recovery across the app.
 
-## 3. Payments
-- [ ] Integrate Stripe and other payment methods; implement secure checkout and refund processing.
-
 ## 4. Order Management
 - [ ] Build full order management: order creation, status updates, order history, order cancellation, and receipt generation/email delivery.
 
 ## 5. Real-time & Notifications
-- [ ] Add real-time notification system: push notifications, email notifications, in-app notification center, vendor notification system, and SMS notifications. Set up Socket.io or Pusher for live updates.
+- [ ] Add real-time notification system: push notifications, email notifications, in-app notification center, vendor notification system, and SMS notifications. Set up Socket.io for live updates.
 
 ## 6. Search & Filtering
 - [ ] Implement advanced search (Elasticsearch), auto-complete search suggestions, advanced filtering (price, rating, distance, cuisine), and recent/favorites functionality.

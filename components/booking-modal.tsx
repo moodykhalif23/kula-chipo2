@@ -150,8 +150,9 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="max-w-4xl w-full max-h-[90vh] p-0 flex flex-col">
+        {/* Sticky Header */}
+        <DialogHeader className="p-6 pb-0 sticky top-0 z-10 bg-background shadow-sm">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <DialogTitle className="text-2xl font-bold mb-2">{vendor.name}</DialogTitle>
@@ -174,10 +175,11 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
           </div>
         </DialogHeader>
 
-        <div className="flex-1 h-[80vh] overflow-y-auto">
+        {/* Scrollable Content */}
+        <div className="flex-1 min-h-0 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
           {showReservations ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-6 grid w-auto grid-cols-2">
+              <TabsList className="mx-6 grid w-auto grid-cols-2 sticky top-0 z-10 bg-background">
                 <TabsTrigger value="order" className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   Order Food
@@ -394,8 +396,8 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                   </div>
 
                   {/* Cart Summary */}
-                  <div className="border-l bg-gray-50 p-6">
-                    <div className="sticky top-0">
+                  <div className="border-l bg-gray-50 p-0 min-h-0 flex flex-col">
+                    <div className="sticky top-0 z-20 p-6 max-h-[calc(90vh-48px)] overflow-y-auto">
                       <h3 className="text-lg font-semibold mb-4">Your Order</h3>
 
                       {getCartItemCount() === 0 ? (
@@ -809,8 +811,8 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
               </div>
 
               {/* Cart Summary */}
-              <div className="border-l bg-gray-50 p-6">
-                <div className="sticky top-0">
+              <div className="border-l bg-gray-50 p-0 min-h-0 flex flex-col">
+                <div className="sticky top-0 z-20 p-6 max-h-[calc(90vh-48px)] overflow-y-auto">
                   <h3 className="text-lg font-semibold mb-4">Your Order</h3>
 
                   {getCartItemCount() === 0 ? (
