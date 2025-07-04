@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChefHat } from "lucide-react"
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
+import MainHeader from "@/components/main-header"
 
 const pricingPlans = {
   basic: {
@@ -93,32 +94,7 @@ export default function SubscribePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header (copied from VendorDashboard) */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-              <ChefHat className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">Kula Chipo</span>
-          </Link>
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/vendors" className="text-gray-700 hover:text-orange-500 font-medium">
-              Find Vendors
-            </Link>
-            <Link href="/experiences" className="text-gray-700 hover:text-orange-500 font-medium">
-              Experiences
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Link href="/vendor-dashboard">
-              <Button variant="outline" className="flex items-center gap-2 bg-transparent">
-                Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MainHeader />
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center">

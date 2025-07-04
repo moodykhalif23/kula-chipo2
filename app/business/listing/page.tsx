@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import MainHeader from "@/components/main-header"
 
 interface BusinessListing {
   businessName: string
@@ -167,24 +168,7 @@ export default function BusinessListingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-              <ChefHat className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">Kula Chipo</span>
-          </Link>
-
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600">Need help?</span>
-            <Button variant="outline" className="bg-transparent">
-              Contact Support
-            </Button>
-          </div>
-        </div>
-      </header>
+      <MainHeader />
 
       <div className="container mx-auto px-4 py-8">
         {/* Progress Header */}
