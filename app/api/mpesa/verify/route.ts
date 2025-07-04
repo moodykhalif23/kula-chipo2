@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
-  const { code, plan } = await req.json()
+  const { code } = await req.json()
 
   // Get credentials from env
   const consumerKey = process.env.MPESA_CONSUMER_KEY

@@ -82,7 +82,7 @@ export default function SubscribePage() {
       } else {
         setMpesaStatus(data.error || "Payment verification failed.")
       }
-    } catch (err) {
+    } catch {
       setMpesaStatus("Network error. Please try again.")
     } finally {
       setMpesaLoading(false)
@@ -164,11 +164,10 @@ export default function SubscribePage() {
                       }}
                       onApprove={async (data, actions) => {
                         if (!actions.order) return
-                        const details = await actions.order.capture()
                         setPaypalSuccess("Payment successful! Your subscription is now active.")
                         setPaypalError(null)
                       }}
-                      onError={(err) => {
+                      onError={() => {
                         setPaypalError("Payment failed. Please try again.")
                         setPaypalSuccess(null)
                       }}

@@ -6,10 +6,11 @@ import bcrypt from "bcryptjs"
 import { PrismaClient, User as PrismaUser } from "@prisma/client"
 import type { Session, User } from "next-auth"
 import type { JWT } from "next-auth/jwt"
+import type { AuthOptions } from "next-auth"
 
 const prisma = new PrismaClient()
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -17,7 +18,7 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials): Promise<any> {
+      async authorize(credentials): Promise<User | null> {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -56,35 +57,36 @@ export const authOptions = {
   ],
   pages: {
     signIn: "/auth/signin",
-    signUp: "/auth/signup",
     error: "/auth/error",
   },
   callbacks: {
     async jwt({ token, user }: { token: JWT; user?: User | PrismaUser }) {
       if (user) {
-        token.role = (user as any).role
+        token.role = (user as PrismaUser).role
       }
       return token
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
-        if (typeof (token as any).sub === "string") {
-          session.user.id = (token as any).sub
+        if (!session.user) session.user = {} as User
+        if (typeof token.sub === "string") {
+          session.user.id = token.sub
         }
         session.user.role = token.role as string
       }
       return session
     },
-    async signIn({ user, account, profile }: { user: User; account: any; profile: any }) {
+    async signIn(params) {
+      const { user, account } = params;
       // For OAuth providers, assign default customer role
-      if (account?.provider === "google" || account?.provider === "facebook") {
-        (user as any).role = "customer"
+      if (account && (account.provider === "google" || account.provider === "facebook")) {
+        (user as User & { role: string }).role = "customer";
       }
-      return true
+      return true;
     },
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET || "fallback-secret-for-development",

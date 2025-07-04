@@ -148,7 +148,6 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       if (this.state.isChunkError || this.state.isImportError) {
         return (
           <ChunkErrorFallback
-            error={this.state.error!}
             resetError={this.resetError}
             onHardRefresh={this.handleHardRefresh}
             retryCount={this.retryCount}
@@ -159,7 +158,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
       // Show specific error UI for network errors
       if (this.state.isNetworkError) {
-        return <NetworkErrorFallback error={this.state.error!} resetError={this.resetError} />
+        return <NetworkErrorFallback resetError={this.resetError} />
       }
 
       return (
@@ -170,7 +169,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
             <p className="text-gray-600 mb-6">
-              We're sorry, but something unexpected happened. Please try refreshing the page.
+              We&apos;re sorry, but something unexpected happened. Please try refreshing the page.
             </p>
             <div className="space-y-3">
               <Button onClick={this.resetError} className="w-full">
@@ -201,13 +200,11 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 }
 
 function ChunkErrorFallback({
-  error,
   resetError,
   onHardRefresh,
   retryCount,
   maxRetries,
 }: {
-  error: Error
   resetError: () => void
   onHardRefresh: () => void
   retryCount: number
@@ -221,7 +218,7 @@ function ChunkErrorFallback({
     // Clear module cache if possible
     if (typeof window !== "undefined" && "webpackChunkName" in window) {
       // Clear webpack chunk cache
-      delete (window as any).__webpack_require__.cache
+      delete (window as unknown as { __webpack_require__?: { cache?: unknown } }).__webpack_require__?.cache
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -240,7 +237,7 @@ function ChunkErrorFallback({
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">
-            We're having trouble loading some parts of the application. This usually happens due to network issues or
+            We&apos;re having trouble loading some parts of the application. This usually happens due to network issues or
             outdated cached files.
           </p>
 
@@ -284,7 +281,7 @@ function ChunkErrorFallback({
   )
 }
 
-function NetworkErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+function NetworkErrorFallback({ resetError }: { resetError: () => void }) {
   const [isOnline, setIsOnline] = React.useState(navigator.onLine)
 
   React.useEffect(() => {
@@ -314,7 +311,7 @@ function NetworkErrorFallback({ error, resetError }: { error: Error; resetError:
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">
             {isOnline
-              ? "We're having trouble connecting to our servers. Please check your connection and try again."
+              ? "We&apos;re having trouble connecting to our servers. Please check your connection and try again."
               : "Please check your internet connection and try again."}
           </p>
 
@@ -348,7 +345,7 @@ export function ComponentErrorBoundary({ children }: { children: React.ReactNode
   return <ErrorBoundary fallback={ComponentErrorFallback}>{children}</ErrorBoundary>
 }
 
-function PageErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+function PageErrorFallback({ resetError }: { resetError: () => void }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="text-center max-w-md">
@@ -371,7 +368,7 @@ function PageErrorFallback({ error, resetError }: { error: Error; resetError: ()
   )
 }
 
-function ComponentErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
+function ComponentErrorFallback({ resetError }: { resetError: () => void }) {
   return (
     <div className="border border-red-200 bg-red-50 rounded-lg p-4 my-4">
       <div className="flex items-center">

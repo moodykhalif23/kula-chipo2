@@ -27,6 +27,7 @@ model User {
 enum Role {
   customer
   vendor
+  admin
 }
 
 model Vendor {

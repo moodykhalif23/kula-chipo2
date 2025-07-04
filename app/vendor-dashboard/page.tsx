@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useDropzone } from "react-dropzone"
@@ -28,220 +28,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-
-// Mock data for the vendor
-const vendorData = {
-  id: 1,
-  name: "Golden Crisp Truck",
-  type: "Food Truck",
-  image: "/placeholder.svg?height=400&width=800",
-  rating: 4.8,
-  totalReviews: 324,
-  totalViews: 2847,
-  monthlyViews: 456,
-  isOpen: true,
-  description: "Serving the crispiest hand-cut fries with 12 unique seasonings since 2018.",
-  address: "123 Food Truck Lane, Downtown",
-  phone: "(555) 123-4567",
-  website: "goldencrisp.com",
-  specialties: ["Hand-cut", "Seasoned", "Crispy", "Double-fried"],
-  hours: {
-    monday: { open: "11:00", close: "21:00", closed: false },
-    tuesday: { open: "11:00", close: "21:00", closed: false },
-    wednesday: { open: "11:00", close: "21:00", closed: false },
-    thursday: { open: "11:00", close: "22:00", closed: false },
-    friday: { open: "11:00", close: "23:00", closed: false },
-    saturday: { open: "10:00", close: "23:00", closed: false },
-    sunday: { open: "12:00", close: "20:00", closed: false },
-  },
-  menu: [
-    { id: 1, name: "Classic Fries", price: 4.99, description: "Hand-cut golden fries with sea salt", available: true },
-    {
-      id: 2,
-      name: "Loaded Fries",
-      price: 7.99,
-      description: "Fries topped with cheese, bacon, and green onions",
-      available: true,
-    },
-    {
-      id: 3,
-      name: "Truffle Fries",
-      price: 9.99,
-      description: "Premium fries with truffle oil and parmesan",
-      available: false,
-    },
-    {
-      id: 4,
-      name: "Spicy Cajun Fries",
-      price: 5.99,
-      description: "Fries with our signature cajun seasoning",
-      available: true,
-    },
-  ],
-}
-
-const recentReviews = [
-  {
-    id: 1,
-    user: "Sarah M.",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 5,
-    date: "2 days ago",
-    comment: "Absolutely amazing! The truffle fries are to die for. Crispy on the outside, fluffy on the inside.",
-    replied: false,
-  },
-  {
-    id: 2,
-    user: "Mike R.",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 4,
-    date: "1 week ago",
-    comment: "Great fries and friendly service. The loaded fries were generous with toppings.",
-    replied: true,
-  },
-  {
-    id: 3,
-    user: "Emma L.",
-    avatar: "/placeholder.svg?height=40&width=40",
-    rating: 5,
-    date: "2 weeks ago",
-    comment: "Best fries in the city! The double-frying technique really makes a difference.",
-    replied: true,
-  },
-]
-
-const analyticsData = {
-  viewsThisMonth: 456,
-  viewsLastMonth: 389,
-  reviewsThisMonth: 12,
-  reviewsLastMonth: 8,
-  averageRating: 4.8,
-  totalCustomers: 2847,
-}
-
-const pricingPlans = {
-  basic: {
-    name: "Basic",
-    price: 29,
-    originalPrice: 39,
-    features: ["Profile listing", "Up to 10 photos", "Basic analytics", "Customer reviews", "Menu management"],
-  },
-  premium: {
-    name: "Premium",
-    price: 59,
-    originalPrice: 79,
-    features: [
-      "Everything in Basic",
-      "Unlimited photos",
-      "Advanced analytics",
-      "Priority support",
-      "Featured listing",
-      "Social media integration",
-    ],
-  },
-  enterprise: {
-    name: "Enterprise",
-    price: 99,
-    originalPrice: 129,
-    features: [
-      "Everything in Premium",
-      "Multiple locations",
-      "Custom branding",
-      "API access",
-      "Dedicated account manager",
-      "White-label solution",
-    ],
-  },
-}
-
-// Mock business user detection (in real app, this would come from auth/user context)
-const isBusinessUser = true
-const hasActivePlan = false
-
-function ImageUploadManager() {
-  const [uploadedImages, setUploadedImages] = useState<string[]>([])
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.map((file: File) => {
-      const reader = new FileReader()
-
-      reader.onload = (e: any) => {
-        setUploadedImages((prevState: any) => [...prevState, e.target.result])
-      }
-
-      reader.readAsDataURL(file)
-    })
-  }, [])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Photo Gallery</CardTitle>
-          <Button className="bg-orange-500 hover:bg-orange-600">
-            <Plus className="w-4 h-4 mr-2" />
-            Upload Photos
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {/* Upload Area */}
-        <div {...getRootProps()} className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-8">
-          <input {...getInputProps()} />
-          <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Upload Your French Fry Photos</h3>
-          <p className="text-gray-600 mb-4">
-            Show off your delicious fries! Upload high-quality photos to attract more customers.
-          </p>
-          <Button className="bg-orange-500 hover:bg-orange-600">Choose Photos</Button>
-          <p className="text-sm text-gray-500 mt-2">Supported formats: JPG, PNG, WebP. Max size: 5MB per photo.</p>
-        </div>
-
-        {/* Photo Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {uploadedImages.map((photo, index) => (
-            <div key={index} className="relative group">
-              <div className="relative aspect-square rounded-lg overflow-hidden">
-                <Image src={photo || "/placeholder.svg"} alt={`Gallery photo ${index}`} fill className="object-cover" />
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
-                    <Button size="sm" variant="secondary">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="secondary" className="text-red-500 hover:text-red-700">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-2">
-                <Input
-                  placeholder="Add caption..."
-                  className="text-sm"
-                  defaultValue={`Delicious fries photo ${index}`}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Photo Management Tools */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-semibold mb-3">Photo Management Tips</h4>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Upload high-quality, well-lit photos of your fries</li>
-            <li>• Show different angles and menu items</li>
-            <li>• Add descriptive captions to help customers</li>
-            <li>• Keep your gallery updated with fresh content</li>
-            <li>• Remove blurry or low-quality images</li>
-          </ul>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+import { pricingPlans } from "@/components/pricing-manager"
 
 interface PricingPlanProps {
   name: string
@@ -294,6 +81,7 @@ function PricingManager({
   hasActivePlan,
   currentPlan,
 }: { isBusinessUser: boolean; hasActivePlan: boolean; currentPlan: string }) {
+  // pricingPlans is in scope here
   return (
     <Card>
       <CardHeader>
@@ -320,7 +108,74 @@ function PricingManager({
 }
 
 export default function VendorDashboard() {
-  const [vendor, setVendor] = useState(vendorData)
+  const [vendorData, setVendorData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchVendor() {
+      setLoading(true)
+      try {
+        const res = await fetch("/api/vendor/listing")
+        if (!res.ok) throw new Error("Failed to fetch vendor data")
+        const data = await res.json()
+        setVendorData(data.vendor)
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchVendor()
+  }, [])
+
+  if (loading) return <div>Loading vendor data...</div>
+  if (error) return <div>Error: {error}</div>
+  if (!vendorData) return <div>No vendor data found.</div>
+
+  const recentReviews = [
+    {
+      id: 1,
+      user: "Sarah M.",
+      avatar: "/placeholder.svg?height=40&width=40",
+      rating: 5,
+      date: "2 days ago",
+      comment: "Absolutely amazing! The truffle fries are to die for. Crispy on the outside, fluffy on the inside.",
+      replied: false,
+    },
+    {
+      id: 2,
+      user: "Mike R.",
+      avatar: "/placeholder.svg?height=40&width=40",
+      rating: 4,
+      date: "1 week ago",
+      comment: "Great fries and friendly service. The loaded fries were generous with toppings.",
+      replied: true,
+    },
+    {
+      id: 3,
+      user: "Emma L.",
+      avatar: "/placeholder.svg?height=40&width=40",
+      rating: 5,
+      date: "2 weeks ago",
+      comment: "Best fries in the city! The double-frying technique really makes a difference.",
+      replied: true,
+    },
+  ]
+
+  const analyticsData = {
+    viewsThisMonth: 456,
+    viewsLastMonth: 389,
+    reviewsThisMonth: 12,
+    reviewsLastMonth: 8,
+    averageRating: 4.8,
+    totalCustomers: 2847,
+  }
+
+  // Mock business user detection (in real app, this would come from auth/user context)
+  const isBusinessUser = true
+  const hasActivePlan = false
+
   const [activeTab, setActiveTab] = useState("overview")
   const [showAddMenuModal, setShowAddMenuModal] = useState(false)
   const [newMenuItem, setNewMenuItem] = useState({ name: "", price: "", description: "", available: true })
@@ -344,13 +199,13 @@ export default function VendorDashboard() {
   }
 
   const handleToggleStatus = () => {
-    setVendor((prev) => ({ ...prev, isOpen: !prev.isOpen }))
+    setVendorData((prev: any) => ({ ...prev, isOpen: !prev.isOpen }))
   }
 
   const handleMenuItemToggle = (itemId: number) => {
-    setVendor((prev) => ({
+    setVendorData((prev: any) => ({
       ...prev,
-      menu: prev.menu.map((item) => (item.id === itemId ? { ...item, available: !item.available } : item)),
+      menu: prev.menu.map((item: any) => (item.id === itemId ? { ...item, available: !item.available } : item)),
     }))
   }
 
@@ -359,7 +214,7 @@ export default function VendorDashboard() {
   }
 
   const handleSaveMenuItem = () => {
-    setVendor((prev) => ({
+    setVendorData((prev: any) => ({
       ...prev,
       menu: [
         ...prev.menu,
@@ -398,7 +253,7 @@ export default function VendorDashboard() {
           </nav>
 
           <div className="flex items-center space-x-4">
-            <Link href={`/vendors/${vendor.id}`}>
+            <Link href={`/vendors/${vendorData.id}`}>
               <Button variant="outline" className="flex items-center gap-2 bg-transparent">
                 <Eye className="w-4 h-4" />
                 View Public Profile
@@ -416,14 +271,14 @@ export default function VendorDashboard() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Welcome back, {vendor.name}!</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Welcome back, {vendorData.name}!</h1>
               <p className="text-gray-600">Manage your profile and track your performance</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${vendor.isOpen ? "bg-green-500" : "bg-red-500"}`} />
-                <span className="font-medium">{vendor.isOpen ? "Open" : "Closed"}</span>
-                <Switch checked={vendor.isOpen} onCheckedChange={handleToggleStatus} />
+                <div className={`w-3 h-3 rounded-full ${vendorData.isOpen ? "bg-green-500" : "bg-red-500"}`} />
+                <span className="font-medium">{vendorData.isOpen ? "Open" : "Closed"}</span>
+                <Switch checked={vendorData.isOpen} onCheckedChange={handleToggleStatus} />
               </div>
             </div>
           </div>
@@ -435,7 +290,7 @@ export default function VendorDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Views</p>
-                    <p className="text-2xl font-bold">{vendor.totalViews.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{vendorData.totalViews.toLocaleString()}</p>
                   </div>
                   <Eye className="w-8 h-8 text-blue-500" />
                 </div>
@@ -451,12 +306,12 @@ export default function VendorDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Average Rating</p>
-                    <p className="text-2xl font-bold">{vendor.rating}</p>
+                    <p className="text-2xl font-bold">{vendorData.rating}</p>
                   </div>
                   <Star className="w-8 h-8 text-yellow-500" />
                 </div>
                 <div className="flex items-center mt-2 text-sm">
-                  <span className="text-gray-500">{vendor.totalReviews} total reviews</span>
+                  <span className="text-gray-500">{vendorData.totalReviews} total reviews</span>
                 </div>
               </CardContent>
             </Card>
@@ -616,11 +471,11 @@ export default function VendorDashboard() {
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">Business Name</Label>
-                      <Input id="name" defaultValue={vendor.name} />
+                      <Input id="name" defaultValue={vendorData.name} />
                     </div>
                     <div>
                       <Label htmlFor="type">Business Type</Label>
-                      <Select defaultValue={vendor.type}>
+                      <Select defaultValue={vendorData.type}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -633,22 +488,22 @@ export default function VendorDashboard() {
                     </div>
                     <div>
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" defaultValue={vendor.phone} />
+                      <Input id="phone" defaultValue={vendorData.phone} />
                     </div>
                     <div>
                       <Label htmlFor="website">Website</Label>
-                      <Input id="website" defaultValue={vendor.website} />
+                      <Input id="website" defaultValue={vendorData.website} />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="address">Address</Label>
-                      <Input id="address" defaultValue={vendor.address} />
+                      <Input id="address" defaultValue={vendorData.address} />
                     </div>
                     <div>
                       <Label htmlFor="description">Description</Label>
-                      <Textarea id="description" defaultValue={vendor.description} rows={4} />
+                      <Textarea id="description" defaultValue={vendorData.description} rows={4} />
                     </div>
                   </div>
                 </div>
@@ -659,7 +514,7 @@ export default function VendorDashboard() {
                   <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <div className="relative h-32 mb-4">
                       <Image
-                        src={vendor.image || "/placeholder.svg"}
+                        src={vendorData.image || "/placeholder.svg"}
                         alt="Cover"
                         fill
                         className="object-cover rounded-lg"
@@ -676,7 +531,7 @@ export default function VendorDashboard() {
                 <div>
                   <Label>Specialties</Label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {vendor.specialties.map((specialty, index) => (
+                    {vendorData.specialties.map((specialty: string, index: number) => (
                       <Badge key={index} variant="secondary" className="flex items-center gap-1">
                         {specialty}
                         <button className="ml-1 hover:text-red-500">
@@ -695,7 +550,7 @@ export default function VendorDashboard() {
                 <div ref={updateHoursRef}>
                   <Label>Operating Hours</Label>
                   <div className="mt-2 space-y-3">
-                    {Object.entries(vendor.hours).map(([day, hours]) => (
+                    {Object.entries(vendorData.hours).map(([day, hours]: [string, any]) => (
                       <div key={day} className="flex items-center gap-4">
                         <div className="w-20 capitalize font-medium">{day}</div>
                         <Switch checked={!hours.closed} />
@@ -738,7 +593,7 @@ export default function VendorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {vendor.menu.map((item) => (
+                  {vendorData.menu.map((item: any) => (
                     <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -777,8 +632,8 @@ export default function VendorDashboard() {
                   <span>Customer Reviews</span>
                   <div className="flex items-center gap-2">
                     <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    <span className="font-bold">{vendor.rating}</span>
-                    <span className="text-gray-500">({vendor.totalReviews} reviews)</span>
+                    <span className="font-bold">{vendorData.rating}</span>
+                    <span className="text-gray-500">({vendorData.totalReviews} reviews)</span>
                   </div>
                 </CardTitle>
               </CardHeader>
@@ -809,7 +664,7 @@ export default function VendorDashboard() {
                             <div className="bg-gray-50 p-3 rounded-lg">
                               <p className="text-sm font-medium mb-1">Your Reply:</p>
                               <p className="text-sm text-gray-700">
-                                Thank you for your feedback! We're glad you enjoyed our fries.
+                                Thank you for your feedback! We&apos;re glad you enjoyed our fries.
                               </p>
                             </div>
                           ) : (
@@ -872,7 +727,7 @@ export default function VendorDashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Total reviews</p>
-                        <p className="text-gray-600 font-medium">{vendor.totalReviews}</p>
+                        <p className="text-gray-600 font-medium">{vendorData.totalReviews}</p>
                       </div>
                     </div>
                   </div>
@@ -959,5 +814,88 @@ export default function VendorDashboard() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+function ImageUploadManager() {
+  const [uploadedImages, setUploadedImages] = useState<string[]>([])
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    acceptedFiles.map((file: File) => {
+      const reader = new FileReader()
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        setUploadedImages((prevState: string[]) => [...prevState, e.target?.result as string])
+      }
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop })
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Photo Gallery</CardTitle>
+          <Button className="bg-orange-500 hover:bg-orange-600">
+            <Plus className="w-4 h-4 mr-2" />
+            Upload Photos
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Upload Area */}
+        <div {...getRootProps()} className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-8">
+          <input {...getInputProps()} />
+          <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Upload Your French Fry Photos</h3>
+          <p className="text-gray-600 mb-4">
+            Show off your delicious fries! Upload high-quality photos to attract more customers.
+          </p>
+          <Button className="bg-orange-500 hover:bg-orange-600">Choose Photos</Button>
+          <p className="text-sm text-gray-500 mt-2">Supported formats: JPG, PNG, WebP. Max size: 5MB per photo.</p>
+        </div>
+
+        {/* Photo Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {uploadedImages.map((photo, index) => (
+            <div key={index} className="relative group">
+              <div className="relative aspect-square rounded-lg overflow-hidden">
+                <Image src={photo || "/placeholder.svg"} alt={`Gallery photo ${index}`} fill className="object-cover" />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                    <Button size="sm" variant="secondary">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="secondary" className="text-red-500 hover:text-red-700">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2">
+                <Input
+                  placeholder="Add caption..."
+                  className="text-sm"
+                  defaultValue={`Delicious fries photo ${index}`}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Photo Management Tools */}
+        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold mb-3">Photo Management Tips</h4>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• Upload high-quality, well-lit photos of your fries</li>
+            <li>• Show different angles and menu items</li>
+            <li>• Add descriptive captions to help customers</li>
+            <li>• Keep your gallery updated with fresh content</li>
+            <li>• Remove blurry or low-quality images</li>
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

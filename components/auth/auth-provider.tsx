@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
-import { SessionProvider } from "next-auth/react"
+import { createContext, useContext } from "react"
+import { SessionProvider, signIn, signOut, useSession } from "next-auth/react"
 import type { Session } from "next-auth"
 
 interface User {
@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, name: string, role?: "customer" | "vendor") => Promise<void>
+  register: (email: string, name: string, password: string, role?: "customer" | "vendor") => Promise<void>
   logout: () => void
   isAuthenticated: boolean
 }
@@ -29,72 +29,60 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, session }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: sessionData, status } = useSession()
+  const isLoading = status === "loading"
 
-  useEffect(() => {
-    // Check for existing session on mount
-    const savedUser = localStorage.getItem("kula-chipo-user")
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser))
-      } catch (error) {
-        console.error("Failed to parse saved user:", error)
-        localStorage.removeItem("kula-chipo-user")
+  // Map session user to your User type (if present and id is defined)
+  const user = sessionData?.user && sessionData.user.id
+    ? {
+        id: sessionData.user.id as string, // ensure string
+        email: sessionData.user.email ?? "",
+        name: sessionData.user.name ?? "",
+        role: sessionData.user.role as "customer" | "vendor",
       }
-    }
-    setIsLoading(false)
-  }, [])
+    : null
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock user data - in real app, this would come from your API
-      const mockUser: User = {
-        id: "1",
+      const res = await signIn("credentials", {
+        redirect: false,
         email,
-        name: email.split("@")[0],
-        role: "customer",
+        password,
+      })
+      if (res?.error) {
+        throw new Error(res.error)
       }
-
-      setUser(mockUser)
-      localStorage.setItem("kula-chipo-user", JSON.stringify(mockUser))
-    } catch (error) {
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        throw new Error(err.message || "Login failed")
+      }
       throw new Error("Login failed")
-    } finally {
-      setIsLoading(false)
     }
   }
 
-  const register = async (email: string, password: string, name: string, role: "customer" | "vendor" = "customer") => {
-    setIsLoading(true)
+  const register = async (email: string, name: string, password: string, role: "customer" | "vendor" = "customer") => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock user data - in real app, this would come from your API
-      const mockUser: User = {
-        id: Date.now().toString(),
-        email,
-        name,
-        role,
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, password, role }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || "Registration failed")
       }
-
-      setUser(mockUser)
-      localStorage.setItem("kula-chipo-user", JSON.stringify(mockUser))
-    } catch (error) {
+      // Optionally, auto-login after registration
+      await login(email, password)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        throw new Error(err.message || "Registration failed")
+      }
       throw new Error("Registration failed")
-    } finally {
-      setIsLoading(false)
     }
   }
 
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem("kula-chipo-user")
+    signOut({ redirect: false })
   }
 
   const value: AuthContextType = {

@@ -86,7 +86,7 @@ export default function OrderTracking({
 
         {/* Order Steps */}
         <div className="space-y-4">
-          {orderSteps.map((step, index) => {
+          {orderSteps.map((step) => {
             const status = getStepStatus(step.id)
             return (
               <div key={step.id} className="flex items-start gap-4">

@@ -21,7 +21,7 @@ interface PricingManagerProps {
   currentPlan?: string
 }
 
-const pricingPlans: Record<string, PricingPlan> = {
+export const pricingPlans: Record<string, PricingPlan> = {
   basic: {
     name: "Basic",
     price: 29,

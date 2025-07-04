@@ -86,25 +86,29 @@ export default function BusinessSignupPage() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Store user data in localStorage for demo purposes
-      localStorage.setItem(
-        "businessUser",
-        JSON.stringify({
-          ...formData,
-          id: Date.now(),
-          registrationDate: new Date().toISOString(),
-        }),
-      )
-
+      // Send registration data to backend API
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.firstName + " " + formData.lastName,
+          email: formData.email,
+          password: formData.password, // assuming password is in formData
+          role: "vendor"
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setErrors({ general: result.error || "Registration failed" });
+        setIsLoading(false);
+        return;
+      }
       // Redirect to business listing form
-      router.push("/business/listing")
-    } catch (error) {
-      setErrors({ general: "Something went wrong. Please try again." })
+      router.push("/business/listing");
+    } catch {
+      setErrors({ general: "Something went wrong. Please try again." });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -366,7 +370,7 @@ export default function BusinessSignupPage() {
                 </Button>
 
                 <p className="text-center text-sm text-gray-600">
-                  By creating an account, you'll be able to list your business and start reaching customers immediately.
+                  By creating an account, you&apos;ll be able to list your business and start reaching customers immediately.
                 </p>
               </form>
             </CardContent>

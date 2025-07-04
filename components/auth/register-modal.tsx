@@ -50,7 +50,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModa
       setEmail("")
       setPassword("")
       setConfirmPassword("")
-    } catch (err) {
+    } catch {
       setError("Registration failed. Please try again.")
     }
   }

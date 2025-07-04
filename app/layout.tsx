@@ -5,6 +5,7 @@ import "./globals.css"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import ErrorBoundary from "@/components/error-boundary"
 import { Toaster } from "@/components/toaster"
+import SessionProviderWrapper from "@/components/session-provider-wrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,13 +24,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ErrorBoundary>
-          <AuthProvider>
-            <header>
-              {/* */}
-            </header>
-            {children}
-            <Toaster />
-          </AuthProvider>
+          <SessionProviderWrapper>
+            <AuthProvider>
+              <header>
+                {/* */}
+              </header>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </SessionProviderWrapper>
         </ErrorBoundary>
       </body>
     </html>

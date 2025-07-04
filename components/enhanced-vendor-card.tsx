@@ -13,7 +13,7 @@ interface Vendor {
   id: number
   name: string
   type: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   image: string
   rating: number
   reviews: number
@@ -160,5 +160,5 @@ export default function EnhancedVendorCard({ vendor }: EnhancedVendorCardProps) 
         showReservations={showReservationButton}
       />
     </>
-  )
+  );
 }

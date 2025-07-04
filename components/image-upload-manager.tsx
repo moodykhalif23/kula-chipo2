@@ -123,7 +123,7 @@ export default function ImageUploadManager() {
 
       // Remove from uploading files
       setUploadingFiles((prev) => prev.filter((u) => u.id !== upload.id))
-    } catch (error) {
+    } catch {
       setUploadingFiles((prev) => prev.map((u) => (u.id === upload.id ? { ...u, error: "Upload failed" } : u)))
     }
   }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Clock, Users, MapPin, Star, X, Plus, Minus } from "lucide-react"
+import { Calendar, Clock, Users, MapPin, Star, Plus, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Image from 'next/image'
 
 interface BookingModalProps {
   isOpen: boolean
@@ -203,10 +204,12 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                                 <CardContent className="p-4">
                                   <div className="flex items-center gap-4">
                                     <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                                      <img
+                                      <Image
                                         src={item.image || "/placeholder.svg"}
                                         alt={item.name}
                                         className="w-full h-full object-cover"
+                                        width={80}
+                                        height={80}
                                       />
                                     </div>
                                     <div className="flex-1">
@@ -266,10 +269,12 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                                 <CardContent className="p-4">
                                   <div className="flex items-center gap-4">
                                     <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                                      <img
+                                      <Image
                                         src={item.image || "/placeholder.svg"}
                                         alt={item.name}
                                         className="w-full h-full object-cover"
+                                        width={80}
+                                        height={80}
                                       />
                                     </div>
                                     <div className="flex-1">
@@ -332,10 +337,12 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                                 <CardContent className="p-4">
                                   <div className="flex items-center gap-4">
                                     <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                                      <img
+                                      <Image
                                         src={item.image || "/placeholder.svg"}
                                         alt={item.name}
                                         className="w-full h-full object-cover"
+                                        width={80}
+                                        height={80}
                                       />
                                     </div>
                                     <div className="flex-1">
@@ -612,10 +619,12 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                             <CardContent className="p-4">
                               <div className="flex items-center gap-4">
                                 <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                                  <img
+                                  <Image
                                     src={item.image || "/placeholder.svg"}
                                     alt={item.name}
                                     className="w-full h-full object-cover"
+                                    width={80}
+                                    height={80}
                                   />
                                 </div>
                                 <div className="flex-1">
@@ -675,10 +684,12 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                             <CardContent className="p-4">
                               <div className="flex items-center gap-4">
                                 <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                                  <img
+                                  <Image
                                     src={item.image || "/placeholder.svg"}
                                     alt={item.name}
                                     className="w-full h-full object-cover"
+                                    width={80}
+                                    height={80}
                                   />
                                 </div>
                                 <div className="flex-1">
@@ -741,10 +752,12 @@ export default function BookingModal({ isOpen, onClose, vendor, showReservations
                             <CardContent className="p-4">
                               <div className="flex items-center gap-4">
                                 <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                                  <img
+                                  <Image
                                     src={item.image || "/placeholder.svg"}
                                     alt={item.name}
                                     className="w-full h-full object-cover"
+                                    width={80}
+                                    height={80}
                                   />
                                 </div>
                                 <div className="flex-1">

@@ -1,10 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Role } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Create a customer user
-  const customer = await prisma.user.create({
-    data: {
+  // Upsert a customer user
+  const customer = await prisma.user.upsert({
+    where: { email: 'customer@kulachipo.com' },
+    update: {},
+    create: {
       email: 'customer@kulachipo.com',
       password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm', // password123 (bcrypt hash)
       name: 'Demo Customer',
@@ -13,9 +15,11 @@ async function main() {
     },
   })
 
-  // Create a vendor user
-  const vendorUser = await prisma.user.create({
-    data: {
+  // Upsert a vendor user
+  const vendorUser = await prisma.user.upsert({
+    where: { email: 'vendor@kulachipo.com' },
+    update: {},
+    create: {
       email: 'vendor@kulachipo.com',
       password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm', // password123 (bcrypt hash)
       name: 'Demo Vendor',
@@ -78,19 +82,37 @@ async function main() {
     include: { vendor: true },
   })
 
-  // Add a review from customer to vendor
-  if (!vendorUser.vendor) {
-    throw new Error('Vendor relation was not created for vendorUser.');
-  }
-  await prisma.review.create({
-    data: {
-      vendorId: vendorUser.vendor.id,
-      userId: customer.id,
-      rating: 5,
-      comment: 'Absolutely amazing! The truffle fries are to die for. Crispy on the outside, fluffy on the inside.',
-      replied: false,
+  // Upsert an admin user
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@kulachipo.com' },
+    update: {},
+    create: {
+      email: 'admin@kulachipo.com',
+      password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm', // password123 (bcrypt hash)
+      name: 'Admin User',
+      role: Role.admin,
+      image: null,
     },
   })
+
+  // Add a review from customer to vendor (only if not exists)
+  const existingReview = await prisma.review.findFirst({
+    where: {
+      vendorId: vendorUser.vendor?.id,
+      userId: customer.id,
+    },
+  })
+  if (!existingReview && vendorUser.vendor) {
+    await prisma.review.create({
+      data: {
+        vendorId: vendorUser.vendor.id,
+        userId: customer.id,
+        rating: 5,
+        comment: 'Absolutely amazing! The truffle fries are to die for. Crispy on the outside, fluffy on the inside.',
+        replied: false,
+      },
+    })
+  }
 
   console.log('Database seeded!')
 }

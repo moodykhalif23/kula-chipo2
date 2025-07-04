@@ -38,7 +38,7 @@ export default function BusinessSignInPage() {
 
       // For demo purposes, redirect to vendor dashboard
       router.push("/vendor-dashboard")
-    } catch (error) {
+    } catch {
       setErrors({ general: "Invalid email or password" })
     } finally {
       setIsLoading(false)
@@ -120,7 +120,7 @@ export default function BusinessSignInPage() {
               </Button>
 
               <div className="text-center">
-                <span className="text-gray-600">Don't have an account? </span>
+                <span className="text-gray-600">Don&apos;t have an account? </span>
                 <Link href="/business/signup" className="text-orange-500 hover:underline font-medium">
                   Sign up for business
                 </Link>

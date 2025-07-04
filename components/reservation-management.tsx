@@ -67,7 +67,7 @@ const mockReservations: Reservation[] = [
   },
 ]
 
-export default function ReservationManagement({ vendorId, vendorName }: ReservationManagementProps) {
+export default function ReservationManagement({}: ReservationManagementProps) {
   const [reservations, setReservations] = useState<Reservation[]>(mockReservations)
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)

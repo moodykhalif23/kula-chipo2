@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuth } from "./auth-provider"
-import { AlertTriangle, Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff } from "lucide-react"
 
 interface LoginModalProps {
   isOpen: boolean
@@ -20,14 +20,11 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
 
     if (!email || !password) {
-      setError("Please fill in all fields")
       return
     }
 
@@ -36,8 +33,8 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
       onClose()
       setEmail("")
       setPassword("")
-    } catch (err) {
-      setError("Invalid email or password")
+    } catch {
+      // Handle error
     }
   }
 
@@ -45,7 +42,6 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     onClose()
     setEmail("")
     setPassword("")
-    setError("")
   }
 
   return (
@@ -56,13 +52,6 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span className="text-sm text-red-700">{error}</span>
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -104,7 +93,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
         </form>
 
         <div className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <button
             type="button"
             onClick={onSwitchToRegister}

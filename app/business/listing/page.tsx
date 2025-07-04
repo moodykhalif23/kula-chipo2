@@ -105,7 +105,7 @@ export default function BusinessListingPage() {
     multiple: true,
   })
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -139,26 +139,24 @@ export default function BusinessListingPage() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Store listing data
-      const listingData = {
-        ...formData,
-        images: uploadedImages,
-        id: Date.now(),
-        createdAt: new Date().toISOString(),
-        status: "pending_review",
+      // Send listing data to backend API
+      const response = await fetch("/api/vendor/listing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          images: uploadedImages,
+        })
+      });
+      if (!response.ok) {
+        throw new Error("Failed to submit listing");
       }
-
-      localStorage.setItem("businessListing", JSON.stringify(listingData))
-
       // Redirect to vendor dashboard
-      router.push("/vendor-dashboard")
+      router.push("/vendor-dashboard");
     } catch (error) {
-      console.error("Error submitting listing:", error)
+      console.error("Error submitting listing:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
