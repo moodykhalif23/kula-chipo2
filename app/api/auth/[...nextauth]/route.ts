@@ -3,29 +3,13 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import FacebookProvider from "next-auth/providers/facebook"
 import bcrypt from "bcryptjs"
-import type { NextAuthOptions } from "next-auth"
+import { PrismaClient, User as PrismaUser } from "@prisma/client"
+import type { Session, User } from "next-auth"
+import type { JWT } from "next-auth/jwt"
 
-// Mock user database - replace with real database in production
-const users = [
-  {
-    id: "1",
-    email: "demo@kulachipo.com",
-    password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm", // password123
-    name: "Demo Customer",
-    role: "customer",
-    image: null,
-  },
-  {
-    id: "2",
-    email: "vendor@kulachipo.com",
-    password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9qm", // password123
-    name: "Demo Vendor",
-    role: "vendor",
-    image: null,
-  },
-]
+const prisma = new PrismaClient()
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -33,33 +17,21 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        console.log("🔐 Authorize attempt:", credentials?.email)
-
+      async authorize(credentials): Promise<any> {
         if (!credentials?.email || !credentials?.password) {
-          console.log("❌ Missing credentials")
           return null
         }
-
         try {
-          // Find user in mock database
-          const user = users.find((u) => u.email === credentials.email)
-
+          // Find user in database
+          const user = await prisma.user.findUnique({ where: { email: credentials.email } })
           if (!user) {
-            console.log("❌ User not found:", credentials.email)
             return null
           }
-
           // Verify password
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
-
           if (!isPasswordValid) {
-            console.log("❌ Invalid password for:", credentials.email)
             return null
           }
-
-          console.log("✅ Authentication successful:", user.email, user.role)
-
           return {
             id: user.id,
             email: user.email,
@@ -68,7 +40,7 @@ export const authOptions: NextAuthOptions = {
             image: user.image,
           }
         } catch (error) {
-          console.error("❌ Auth error:", error)
+          console.error("Auth error:", error)
           return null
         }
       },
@@ -88,27 +60,26 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User | PrismaUser }) {
       if (user) {
-        token.role = user.role
+        token.role = (user as any).role
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
-        session.user.id = token.sub
+        if (typeof (token as any).sub === "string") {
+          session.user.id = (token as any).sub
+        }
         session.user.role = token.role as string
       }
       return session
     },
-    async signIn({ user, account, profile }) {
-      console.log("🔑 Sign in callback:", user.email, account?.provider)
-
+    async signIn({ user, account, profile }: { user: User; account: any; profile: any }) {
       // For OAuth providers, assign default customer role
       if (account?.provider === "google" || account?.provider === "facebook") {
-        user.role = "customer"
+        (user as any).role = "customer"
       }
-
       return true
     },
   },
