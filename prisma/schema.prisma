@@ -1,0 +1,91 @@
+// Prisma schema for Kula Chipo
+// PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  name     String
+  role     Role
+  image    String?
+  vendor   Vendor?
+  reviews  Review[]
+  reservations Reservation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  customer
+  vendor
+}
+
+model Vendor {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [id], references: [id])
+  type         String
+  description  String
+  address      String
+  phone        String
+  website      String?
+  isOpen       Boolean  @default(true)
+  rating       Float    @default(0)
+  totalReviews Int      @default(0)
+  totalViews   Int      @default(0)
+  monthlyViews Int      @default(0)
+  specialties  String[]
+  hours        Json
+  image        String?
+  menuItems    MenuItem[]
+  reviews      Review[]
+  reservations Reservation[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  vendorId    String
+  name        String
+  price       Float
+  description String
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  vendor    Vendor  @relation(fields: [vendorId], references: [id])
+  vendorId  String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  rating    Int
+  comment   String
+  date      DateTime @default(now())
+  replied   Boolean  @default(false)
+}
+
+model Reservation {
+  id         String   @id @default(uuid())
+  vendor     Vendor  @relation(fields: [vendorId], references: [id])
+  vendorId   String
+  user       User    @relation(fields: [userId], references: [id])
+  userId     String
+  date       DateTime
+  time       String
+  partySize  Int
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+} 
