@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChefHat } from "lucide-react"
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
 
 const pricingPlans = {
   basic: {
@@ -48,11 +49,45 @@ export default function SubscribePage() {
   const planKey = (params.plan as string)?.toLowerCase()
   const plan = pricingPlans[planKey as keyof typeof pricingPlans]
 
+  const [paypalSuccess, setPaypalSuccess] = useState<string | null>(null)
+  const [paypalError, setPaypalError] = useState<string | null>(null)
+  const [mpesaCode, setMpesaCode] = useState("")
+  const [mpesaStatus, setMpesaStatus] = useState<string | null>(null)
+  const [mpesaLoading, setMpesaLoading] = useState(false)
+
+  // PayPal client ID from env
+  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
+
   useEffect(() => {
     if (!plan) {
       router.replace("/vendor-dashboard")
     }
   }, [plan, router])
+
+  // M-Pesa handler
+  async function handleMpesaSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setMpesaLoading(true)
+    setMpesaStatus(null)
+    try {
+      const res = await fetch("/api/mpesa/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: mpesaCode, plan: plan.name }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setMpesaStatus("Payment successful! Your subscription is now active.")
+        setMpesaCode("")
+      } else {
+        setMpesaStatus(data.error || "Payment verification failed.")
+      }
+    } catch (err) {
+      setMpesaStatus("Network error. Please try again.")
+    } finally {
+      setMpesaLoading(false)
+    }
+  }
 
   if (!plan) return null
 
@@ -107,19 +142,59 @@ export default function SubscribePage() {
             </ul>
             <div className="space-y-4">
               <h3 className="font-semibold">Choose Payment Method</h3>
-              {/* PayPal Button Placeholder */}
-              <div className="border p-4 rounded-lg flex flex-col items-center">
+              {/* PayPal Integration */}
+              <div className="border p-4 rounded-lg flex flex-col items-center w-full">
                 <span className="mb-2">Pay with PayPal</span>
-                {/* TODO: Integrate PayPal JS SDK here */}
-                <Button className="bg-blue-600 hover:bg-blue-700 w-full">PayPal Checkout</Button>
+                {paypalSuccess && <div className="text-green-600 mb-2">{paypalSuccess}</div>}
+                {paypalError && <div className="text-red-600 mb-2">{paypalError}</div>}
+                {paypalClientId ? (
+                  <PayPalScriptProvider options={{ clientId: paypalClientId }}>
+                    <PayPalButtons
+                      style={{ layout: "vertical" }}
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          intent: "CAPTURE",
+                          purchase_units: [
+                            {
+                              amount: { currency_code: "USD", value: plan.price.toString() },
+                              description: `${plan.name} Plan Subscription`,
+                            },
+                          ],
+                        })
+                      }}
+                      onApprove={async (data, actions) => {
+                        if (!actions.order) return
+                        const details = await actions.order.capture()
+                        setPaypalSuccess("Payment successful! Your subscription is now active.")
+                        setPaypalError(null)
+                      }}
+                      onError={(err) => {
+                        setPaypalError("Payment failed. Please try again.")
+                        setPaypalSuccess(null)
+                      }}
+                    />
+                  </PayPalScriptProvider>
+                ) : (
+                  <div className="text-red-600">PayPal is not configured.</div>
+                )}
               </div>
               {/* M-Pesa Option */}
-              <div className="border p-4 rounded-lg flex flex-col items-center">
+              <form className="border p-4 rounded-lg flex flex-col items-center w-full" onSubmit={handleMpesaSubmit}>
                 <span className="mb-2">Pay with M-Pesa</span>
                 <p className="text-sm text-gray-600 mb-2">Send payment to <b>MPESA Paybill: 123456</b> and enter your transaction code below.</p>
-                <input type="text" placeholder="M-Pesa Transaction Code" className="border rounded px-3 py-2 w-full mb-2" />
-                <Button className="bg-green-600 hover:bg-green-700 w-full">Submit M-Pesa Payment</Button>
-              </div>
+                <input
+                  type="text"
+                  placeholder="M-Pesa Transaction Code"
+                  className="border rounded px-3 py-2 w-full mb-2"
+                  value={mpesaCode}
+                  onChange={e => setMpesaCode(e.target.value)}
+                  required
+                />
+                <Button className="bg-green-600 hover:bg-green-700 w-full" type="submit" disabled={mpesaLoading}>
+                  {mpesaLoading ? "Verifying..." : "Submit M-Pesa Payment"}
+                </Button>
+                {mpesaStatus && <div className={`mt-2 ${mpesaStatus.includes("success") ? "text-green-600" : "text-red-600"}`}>{mpesaStatus}</div>}
+              </form>
             </div>
             <Link href="/vendor-dashboard">
               <Button variant="outline" className="w-full mt-4">Back to Dashboard</Button>
